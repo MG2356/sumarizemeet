@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // === Summarize API ===
-app.post("/api/summarize", async (req, res) => {
+app.post("/summarize", async (req, res) => {
   try {
     const { transcript, instruction } = req.body;
     if (!transcript) return res.status(400).json({ error: "Transcript required" });
@@ -39,8 +39,8 @@ ${transcript}
   }
 });
 
-// === Email API === (unchanged)
-app.post("/api/email", async (req, res) => {
+// === Email API ===
+app.post("/email", async (req, res) => {
   try {
     const { to, subject, html } = req.body;
     if (!to?.length) return res.status(400).json({ error: "Recipients required" });
@@ -69,5 +69,5 @@ app.post("/api/email", async (req, res) => {
   }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// ✅ Instead of listen, export for Vercel
+export default app;
