@@ -10,23 +10,16 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// === Health Check API ===
-app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "Server is working ✅" });
-});
-
 // === Gemini client ===
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // === Summarize API ===
-app.post("/summarize", async (req, res) => {
+app.post("/api/summarize", async (req, res) => {
   try {
     const { transcript, instruction } = req.body;
     if (!transcript) return res.status(400).json({ error: "Transcript required" });
 
-    const model = genAI.getGenerativeModel({
-      model: process.env.GEMINI_MODEL || "gemini-1.5-flash",
-    });
+    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-1.5-flash" });
 
     const prompt = `
 You are a meeting summarizer. Always produce clear, structured output (bullets, sections, action items).
@@ -37,8 +30,7 @@ ${transcript}
 `;
 
     const result = await model.generateContent(prompt);
-    const summary =
-      result.response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    const summary = result.response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
     res.json({ summary });
   } catch (err) {
@@ -47,8 +39,8 @@ ${transcript}
   }
 });
 
-// === Email API ===
-app.post("/email", async (req, res) => {
+// === Email API === (unchanged)
+app.post("/api/email", async (req, res) => {
   try {
     const { to, subject, html } = req.body;
     if (!to?.length) return res.status(400).json({ error: "Recipients required" });
@@ -76,11 +68,6 @@ app.post("/email", async (req, res) => {
     res.status(500).json({ error: "Email sending failed" });
   }
 });
-if (process.env.NODE_ENV !== "production") {
-  const PORT = 5000;
-  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-}
 
-
-// ✅ Export app for Vercel
-export default app;
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running `));
